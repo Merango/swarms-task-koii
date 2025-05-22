@@ -1,22 +1,129 @@
-# Test Configuration
-task_id: "1111" # Task ID from config-task.yml
-middle_server_url: "http://localhost:3000"
-# collection used to determine the max_rounds, if the value is not directly set
-rounds_collection: "documentations"
-# base_port: 5000 # Base port for worker servers
-# max_rounds: 1 # Maximum number of test rounds
+# Orca Agent Test Configuration
+#
+# This configuration provides comprehensive settings for 
+# test execution, environment setup, and test behavior control.
 
-# Paths
-# relative to the test directory
-data_dir: data/minimal # Directory containing test data
-# workers_config: workers.json # Worker configuration file
+# Test Environment Configuration
+# ------------------------------
+test_environment:
+  # Specifies the current testing mode
+  mode: testing # Alternatives: development, staging
 
-# MongoDB Configuration
-mongodb:
-  database: builder247
-  collections:
-    documentations:
-      data_file: documentations.json
-      required_count: 1
-    audits:
-      required_count: 0 # No data file, just needs to exist
+  # Global timeout settings (in seconds)
+  timeouts:
+    short: 5      # For quick, simple operations
+    medium: 30    # Standard operation timeout
+    long: 120     # For complex or potentially slow operations
+
+# Logging Configuration
+# --------------------
+logging:
+  # Defines verbosity and detail level for test logs
+  level: DEBUG   # Levels: CRITICAL, ERROR, WARNING, INFO, DEBUG
+  
+  # Log output destinations
+  outputs:
+    console: true    # Print logs to console
+    file: 
+      enabled: true  # Write logs to file
+      path: './test-logs/' # Log file directory
+      max_size: 10   # Maximum log file size in MB
+
+# Test Data Management
+# -------------------
+test_data:
+  # Controls how test data is generated and managed
+  generation:
+    mode: random    # Alternatives: fixed, incremental
+    seed: null      # Optional random seed for reproducibility
+  
+  # Data isolation between test runs
+  isolation:
+    enabled: true   # Separate data for each test run
+    cleanup: 
+      before_test: true  # Clear data before test
+      after_test: true   # Remove test data post-execution
+
+# Mocking and Simulation
+# ---------------------
+mocking:
+  # Global mocking strategy
+  strategy: comprehensive  # Levels: minimal, comprehensive, strict
+  
+  # External service mocking configuration
+  external_services:
+    github:
+      enabled: true    # Mock GitHub API calls
+      mode: record     # Modes: mock, pass-through, record
+    
+    anthropic:
+      enabled: true    # Mock AI service calls
+      response_type: cached  # Cached or dynamic mock responses
+
+# Performance and Resource Management
+# ----------------------------------
+performance:
+  # Parallel test execution settings
+  parallel_execution:
+    enabled: true    # Run tests in parallel
+    max_workers: 4   # Maximum concurrent test workers
+  
+  # Resource constraints
+  resources:
+    memory_limit: 512  # Maximum memory per test worker (MB)
+    cpu_limit: 50      # Maximum CPU usage percentage
+
+# Security and Sensitivity
+# ----------------------
+security:
+  # Sensitive data handling
+  mask_secrets: true   # Mask sensitive information in logs
+  
+  # Test credential management
+  credentials:
+    rotation: true     # Rotate test credentials between runs
+    scope: test_only   # Prevent real credential usage
+
+# Test Selection and Filtering
+# --------------------------
+test_selection:
+  # Patterns to include or exclude tests
+  include:
+    - 'test_*'         # Include tests starting with 'test_'
+    - '*_integration'  # Include integration tests
+  
+  exclude:
+    - '*_slow'         # Exclude tests marked as slow
+    - 'debug_*'        # Exclude debug-specific tests
+
+# Reporting and Analysis
+# ---------------------
+reporting:
+  # Test result reporting configuration
+  formats:
+    - junit     # XML format for CI systems
+    - html      # Human-readable HTML report
+  
+  # Coverage tracking
+  coverage:
+    enabled: true
+    minimum_threshold:
+      lines: 70
+      branches: 60
+      functions: 65
+
+# Experimental and Advanced Features
+# ---------------------------------
+experimental:
+  # Advanced testing features
+  features:
+    error_injection: true     # Randomly inject errors
+    performance_profiling: true  # Measure test performance
+
+# Best Practices Commentary
+# -----------------------
+# 1. Keep test configurations flexible and environment-aware
+# 2. Use mocking to isolate tests from external dependencies
+# 3. Implement comprehensive logging for diagnostics
+# 4. Balance between test coverage and execution speed
+# 5. Regularly review and update test configuration
