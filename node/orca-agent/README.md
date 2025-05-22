@@ -1,136 +1,161 @@
-# Orca Agent Test Configuration
+# Orca Agent Test Configuration Guide
 
 ## Overview
-This document provides comprehensive test documentation and configuration guidelines for the Orca Agent, covering various testing approaches and best practices.
+This comprehensive guide explains test configuration, strategies, and best practices for the Orca Agent testing infrastructure.
 
-## Test Framework
-- **Primary Framework**: pytest
-- **Language**: Python
-- **Test Types**:
-  - Unit Tests
-  - Integration Tests
-  - End-to-End (E2E) Tests
+## Test Framework Configuration
 
-## Test Configuration
-
-### Pytest Configuration
-Create a `pytest.ini` or `pyproject.toml` with configuration:
+### Pytest Configuration Detailed Breakdown
 ```ini
 [tool:pytest]
+# Test path discovery
 testpaths = tests
+
+# Python test file naming conventions
 python_files = test_*.py
 python_classes = *Test
 python_functions = test_*
-addopts = -v --doctest-modules --junitxml=junit/test-results.xml
+
+# Additional pytest options
+addopts = 
+    -v                  # Verbose output
+    --doctest-modules   # Enable doctest support
+    --junitxml=junit/test-results.xml  # Generate XML test report
 ```
 
-### Environment Variables
-Create a `.env.test` file:
-```bash
-# API Configuration
-ORCA_API_URL=http://localhost:8000
-ORCA_API_KEY=your_test_api_key
+#### Configuration Impact Explanation
+- Standardizes test file and function discovery
+- Enables comprehensive reporting
+- Supports documentation-based testing
+- Facilitates integration with CI/CD systems
 
-# Logging
+### Environment Configuration
+
+#### Recommended .env.test Setup
+```bash
+# Test Environment Configuration
+PYTHON_ENV=testing
 LOG_LEVEL=DEBUG
+
+# API and Service Configurations
+TEST_API_URL=http://localhost:8000
+TEST_API_KEY=test_api_secret_12345
+
+# Database Configuration
+TEST_DB_URI=sqlite:///test_database.db
+TEST_DB_ECHO=true
+
+# Feature Flags
+MOCK_EXTERNAL_SERVICES=true
+ENABLE_TEST_LOGGING=true
 ```
 
-## Running Tests
+## Testing Strategies
 
-### Standard Test Suite
+### Dependency Mocking Example
+```python
+# Demonstrates controlled test environment setup
+def test_github_service(mocker):
+    # Mock external GitHub service
+    mock_github = mocker.patch('src.services.github_service.GitHubService')
+    mock_github.return_value.get_repo.return_value = MockRepository()
+```
+
+### Performance and Coverage Configuration
 ```bash
-# Run all tests
+# Run tests with coverage
+pytest --cov=src tests/ --cov-report=html
+```
+
+## Advanced Configuration Techniques
+
+### Test Isolation Principles
+- Use unique database connections for each test
+- Implement fixture-based state management
+- Create predictable test data generation methods
+
+### Security in Testing
+- Generate test-specific credentials
+- Mock authentication mechanisms
+- Validate input sanitization
+
+## Execution Strategies
+
+### Running Tests
+```bash
+# Standard test execution
 pytest
 
-# Run specific module
-pytest tests/test_db_operations.py
+# Run specific test module
+pytest tests/test_specific_module.py
 
-# Run with coverage
-pytest --cov=src tests/
+# Generate coverage report
+pytest --cov=src --cov-report=term-missing
 
-# Generate HTML coverage report
-pytest --cov=src --cov-report=html
+# Verbose mode with detailed output
+pytest -vv
 ```
-
-## Test Structure
-
-### Directory Layout
-```
-node/orca-agent/
-├── tests/
-│   ├── __init__.py
-│   ├── conftest.py          # Shared fixtures
-│   ├── test_db_operations.py
-│   ├── test_logging.py
-│   ├── test_models.py
-│   └── stages/               # E2E test stages
-│       ├── worker_audit.py
-│       ├── worker_check.py
-│       └── ...
-```
-
-### Writing Tests
-```python
-def test_database_connection():
-    """Test database connection establishment."""
-    connection = establish_db_connection()
-    assert connection is not None, "Failed to establish database connection"
-
-def test_invalid_api_key():
-    """Test API authentication failure."""
-    with pytest.raises(AuthenticationError):
-        perform_api_request(invalid_key)
-```
-
-## Mocking and Fixtures
-Use `pytest.fixture` for setup and teardown:
-```python
-@pytest.fixture
-def mock_github_service():
-    """Mock GitHub service for testing."""
-    with patch('src.services.github_service.GitHubService') as mock:
-        yield mock
-
-def test_github_integration(mock_github_service):
-    mock_github_service.return_value.get_repo.return_value = MockRepo()
-```
-
-## Continuous Integration
-- Automatic test runs on:
-  - Pull request creation
-  - Merge to main branch
-  - Scheduled nightly builds
-
-## Performance and Load Testing
-```bash
-# Run performance tests
-pytest tests/performance/
-```
-
-## Debugging
-- Use `-vv` for verbose output
-- Leverage `logging` module
-- Use `pytest.set_trace()` for interactive debugging
-
-## Best Practices
-1. Keep tests independent
-2. Test one behavior per test
-3. Use meaningful test names
-4. Cover edge cases
-5. Mock external dependencies
-
-## Security Testing
-- Test authentication mechanisms
-- Validate input sanitization
-- Check for potential vulnerabilities
 
 ## Troubleshooting
-- Ensure all dependencies are installed
-- Check network connectivity
-- Verify environment variable configuration
 
-## Contributing
-1. Write clear, focused tests
-2. Maintain high test coverage
-3. Update documentation
-4. Follow existing testing patterns
+### Common Configuration Challenges
+1. Asynchronous test handling
+2. External service dependencies
+3. Complex mocking scenarios
+
+### Debugging Recommendations
+- Use `-s` flag to show print statements
+- Leverage `pytest.set_trace()` for interactive debugging
+- Implement comprehensive logging
+
+## Best Practices
+
+### Test Design Guidelines
+- Follow single responsibility principle
+- Create reproducible test scenarios
+- Cover edge cases and error conditions
+- Minimize test interdependencies
+
+### Performance Optimization
+- Use lightweight mocking
+- Parallelize test execution
+- Minimize external service interactions
+
+## Continuous Integration
+
+### CI/CD Test Configuration
+- Automatic test execution on pull requests
+- Coverage threshold enforcement
+- Performance benchmarking
+- Security vulnerability scanning
+
+## Maintenance Recommendations
+
+### Periodic Review Checklist
+- Update testing dependencies
+- Refactor test configurations
+- Assess and improve test coverage
+- Align tests with system architecture
+
+### Contribution Guidelines
+- Follow existing test structure
+- Write clear, descriptive test cases
+- Ensure high readability
+- Maintain comprehensive documentation
+
+## Example Test Structure
+```python
+import pytest
+
+def test_api_endpoint(mock_client):
+    """Example test with clear documentation."""
+    # Arrange: Setup test conditions
+    expected_response = {...}
+    
+    # Act: Perform test action
+    response = mock_client.get('/test-endpoint')
+    
+    # Assert: Validate outcomes
+    assert response.status_code == 200
+    assert response.json() == expected_response
+```
