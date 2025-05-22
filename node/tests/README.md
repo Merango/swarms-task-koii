@@ -1,73 +1,121 @@
-# Summarizer Task Tests
+# Node Test Suite Documentation
 
-This directory contains end-to-end tests for the summarizer task using the Prometheus test framework.
+## Overview
+This directory contains comprehensive test suites for the Swarms Node implementation, covering various components and workflows.
 
-## Structure
+## Test Framework
+- **Primary Framework**: Jest (for TypeScript tests)
+- **E2E Testing**: Custom Python-based test runner
+- **Test Types**: 
+  - Unit Tests
+  - Integration Tests
+  - End-to-End (E2E) Tests
 
-```
-tests/
-├── config.yaml           # Test configuration
-├── workers.json         # Worker configuration
-├── data/               # Test data
-│   ├── todos.json     # Sample todo items
-│   └── issues.json    # Sample issues
-├── stages/            # Test stages implementation
-├── e2e.py            # Test runner script
-└── steps.py          # Test steps definition
-```
+## Configuration
 
-## Prerequisites
+### Jest Configuration
+- Configuration file: `jest.config.js`
+- Key settings:
+  ```javascript
+  module.exports = {
+    preset: 'ts-jest',
+    testEnvironment: 'node',
+    roots: ['<rootDir>/tests'],
+    transform: {
+      '^.+\\.tsx?$': 'ts-jest'
+    },
+    testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
+    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
+  }
+  ```
 
-1. Install the test framework:
-
+### Environment Variables
+Create a `.env` file with the following keys:
 ```bash
-pip install -e test-framework/
-```
+# API Configuration
+SWARMS_API_URL=http://localhost:8080
+SWARMS_API_KEY=your_test_api_key
 
-2. Set up environment variables in `.env`:
+# Middle Server Configuration
+MIDDLE_SERVER_URL=http://localhost:3000
+SWARMS_ADMIN_KEY=your_admin_test_key
 
-```
-ANTHROPIC_API_KEY=your_test_key
-GITHUB_USERNAME=your_test_username
-GITHUB_TOKEN=your_test_token
+# Optional Debugging
+DEBUG=swarms:test*
 ```
 
 ## Running Tests
 
-To run the tests:
-
+### TypeScript/Jest Tests
 ```bash
-python -m tests.e2e
+# Run all tests
+npm test
+
+# Run specific test file
+npm test -- tests/main.test.ts
+
+# Watch mode (development)
+npm test -- --watch
 ```
 
-To force reset databases before running:
-
+### Python E2E Tests
 ```bash
+# Run all E2E tests
+python -m tests.e2e
+
+# Reset databases before running
 python -m tests.e2e --reset
 ```
 
-## Test Flow
+## Test Coverage
+```bash
+# Generate coverage report
+npm run test:coverage
+```
 
-1. API Key Validation
+## Writing Tests
 
-   - Validates Anthropic API key
+### Best Practices
+1. Use descriptive test names
+2. Test one behavior per test
+3. Use setup and teardown methods
+4. Mock external dependencies
+5. Test both positive and negative scenarios
 
-2. GitHub Validation
+### Example Test Structure
+```typescript
+describe('API Endpoint Tests', () => {
+  beforeEach(() => {
+    // Setup test environment
+  });
 
-   - Validates GitHub credentials
+  afterEach(() => {
+    // Cleanup resources
+  });
 
-3. Todo Management
+  it('should create a swarm job successfully', async () => {
+    // Test implementation
+  });
 
-   - Fetches todos for each worker
-   - Generates summaries
-   - Submits results
+  it('should handle authentication errors', async () => {
+    // Error handling test
+  });
+});
+```
 
-4. Audit Process
-   - Workers audit each other's submissions
+## Debugging
+- Use `DEBUG` environment variable for verbose logging
+- Leverage Jest's `--verbose` flag
+- Use source map support for better error tracing
 
-## Adding New Tests
+## Continuous Integration
+Tests are automatically run on:
+- Pull request creation
+- Merge to main branch
+- Scheduled nightly builds
 
-1. Create a new stage in `stages/`
-2. Add stage to `stages/__init__.py`
-3. Add test step in `steps.py`
-4. Update test data in `data/` if needed
+## Troubleshooting
+- Ensure all dependencies are installed (`npm install`)
+- Check environment variable configuration
+- Verify network connectivity for external services
+- Review test logs for specific error details
